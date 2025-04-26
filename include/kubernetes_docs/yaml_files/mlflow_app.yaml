@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dannnn-mlflow-app
+spec:
+  selector:
+    matchLabels:
+      app: dannnn-mlflow-pods
+  replicas: 1      
+  template:
+    metadata:
+      labels:
+        app: dannnn-mlflow-pods
+    spec:
+      containers:
+        - name: dannnn-mlflow-container
+          image: astro/tfmlflow:0.0.1
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          command: [ "/bin/bash", "-c", "--" ]
+          args: [ "mlflow server --host 0.0.0.0 --backend-store-uri sqlite:////efs/mlflow_backend.db --default-artifact-root /efs/mlflow_data/"]
+          volumeMounts:
+          - name: persistent-storage
+            mountPath: /efs
+      volumes:
+      - name: persistent-storage
+        persistentVolumeClaim:
+          claimName: efs-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dannnn-mlflow-svc
+spec:
+  allocateLoadBalancerNodePorts: true
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 5000
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: dannnn-mlflow-pods
+  sessionAffinity: None
+  type: LoadBalancer

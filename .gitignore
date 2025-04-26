@@ -1,0 +1,13 @@
+.git
+airflow_settings.yaml
+airflow.cfg
+include/.aws/
+include/config
+*/__pycache__
+code/.*
+include/code/__pycache__
+penv/
+efs/
+_archive/
+notes.txt
+.vscode/
